@@ -1,4 +1,4 @@
-FROM node:24.14-trixie-slim@sha256:c319bb4fac67c01ced508b67193a0397e02d37555d8f9b72958649efd302b7f8 AS builder
+FROM node:24.14-trixie-slim@sha256:c319bb4fac67c01ced508b67193a0397e02d37555d8f9b72958649efd302b7f8
 ARG CI_ENV=noci
 ARG GIT_COMMIT=git_commit_undefined
 ARG GIT_BRANCH=git_branch_undefined
@@ -10,16 +10,6 @@ COPY package*.json ./
 RUN npm ci --ignore-scripts
 COPY ./ .
 
-# Runtime: distroless has no npm, no shell, no apt -- so npm and its bundled
-# tar are absent from every layer of the shipped image, not just whiteouted.
-FROM gcr.io/distroless/nodejs24-debian13
-ARG CI_ENV=noci
-ARG GIT_COMMIT=git_commit_undefined
-ARG GIT_BRANCH=git_branch_undefined
-ARG VERSION=not_versioned
-WORKDIR /app
-COPY --from=builder /app /app
-
 LABEL git_commit $GIT_COMMIT
 LABEL git_branch $GIT_BRANCH
 LABEL ci_environment $CI_ENV
@@ -27,4 +17,4 @@ LABEL version $VERSION
 
 EXPOSE 3000
 
-CMD ["index.js"]
+CMD ["node", "index.js"]
